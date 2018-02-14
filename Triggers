@@ -1,0 +1,19 @@
+Create TRIGGER [dbo].[Location_Composite_Key]
+ON [dbo].[Location]
+INSTEAD OF INSERT
+AS 
+BEGIN
+
+    DECLARE @location_id as int;
+    DECLARE @company_id as int;
+    DECLARE @location_name as nvarchar(50);
+
+    SET @location_id = ISNULL((SELECT MAX(LocationCode) FROM Location WHERE CompanyCode IN (SELECT CompanyCode FROM INSERTED)), 0);
+    SET @location_id = @location_id + 1;
+    
+    select @company_id=CompanyCode, @location_name=LocationName from INSERTED
+    
+    insert into Location (CompanyCode,LocationCode,LocationName) 
+        Values (@company_id,@location_id,@location_name)
+
+END
